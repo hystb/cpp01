@@ -13,11 +13,39 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
+#include <string>
+
+void	ft_replace(char *buffer, std::ifstream *is, char **argv)
+{
+	std::string	filename = argv[1];
+	size_t		find;
+	std::string	buf = buffer;
+	std::string exp1 = argv[2];
+	std::string exp2 = argv[3];
+
+	if (is->good())
+	{
+		if (is->peek() == std::ifstream::traits_type::eof())
+		{
+			std::cout << "Error" << std::endl << "Nothing in the file" << std::endl;
+			return ;
+		}
+		std::ofstream os(filename.append(".replace").data());
+			find = buf.find(exp1, 0);
+			while (find != std::string::npos)
+			{
+				buf.erase(find, exp1.length());
+				buf.insert(find, exp2);
+				find = buf.find(exp1, find);			
+			}
+			os << buf;
+			os.close();
+			return;			
+	}
+}
 
 void	ft_sed(char **argv)
 {
-	std::string exp1 = argv[2];
-	std::string exp2 = argv[3];
 	int			lenght = 0;
 	char		*buffer;
 
@@ -28,11 +56,18 @@ void	ft_sed(char **argv)
 		lenght = is.tellg();
 		is.seekg(0, is.beg);
 	}
-	buffer = new char [lenght];
+	else
+	{
+		std::cout << "Error" << std::endl << "No file" << std::endl;
+		is.close();
+		return;
+	}
+	buffer = new char [lenght + 1];
 	is.read(buffer, lenght);
+	buffer[lenght] = '\0';
+	is.seekg(0, is.beg);
+	ft_replace(buffer, &is, argv);
 	is.close();
-	std::cout << buffer << std::endl;
-	
 	delete [] buffer;
 		
 }
